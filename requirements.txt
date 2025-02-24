@@ -1,4 +1,6 @@
-flask
-torch
 transformers
+torch
+sentencepiece
+protobuf
+flask
 gunicorn
