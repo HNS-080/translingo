@@ -2,11 +2,11 @@ from flask import Flask, request, jsonify
 import requests
 import os
 from dotenv import load_dotenv
-
+from flask_cors import CORS
 load_dotenv()
 
 app= Flask(__name__)
-
+CORS(app)
 API_URL = "https://api-inference.huggingface.co/models/JexCaber/TransLingo"
 
 HEADERS ={"Authorization": f"Bearer {os.getenv('HUGGINGFACE_TOKEN')}"}
