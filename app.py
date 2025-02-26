@@ -14,7 +14,7 @@ def simplify_text():
     input_text = request.json.get('text', '')
 
     inputs = tokenizer(input_text, return_tensors="pt")
-    outputs = model.generate(**inputs, max_length=150, top_k=50)
+    outputs = model.generate(**inputs, max_length=50, top_k=50)
     simplified_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
     print(simplified_text)
