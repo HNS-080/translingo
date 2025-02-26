@@ -4,3 +4,4 @@ sentencepiece
 protobuf
 flask
 gunicorn
+flask_cors
