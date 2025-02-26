@@ -9,7 +9,7 @@ app= Flask(__name__)
 
 API_URL = "https://api-inference.huggingface.co/models/JexCaber/TransLingo"
 
-HEADERS ={"Authorization": f"Bearer {os.getenv('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')}"}
+HEADERS ={"Authorization": f"Bearer {os.getenv('HUGGINGFACE_TOKEN')}"}
 
 @app.route("/simplify-text", methods=['POST'])
 def simplify_text():
