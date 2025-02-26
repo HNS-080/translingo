@@ -1,27 +1,21 @@
-from flask import Flask, request, jsonify
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+from flask import Flask, request, jsonify, make_response
+from flask_cors import CORS  
+from transformers import T5ForConditionalGeneration, T5Tokenizer
 
 app = Flask(__name__)
+CORS(app)  
 
-# Load model and tokenizer
-model_name = "JexCaber/TransLingo" 
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+model_path = 'JexCaber/Translingo' 
+model = T5ForConditionalGeneration.from_pretrained(model_path)
+tokenizer = T5Tokenizer.from_pretrained(model_path)
 
-@app.route("/simplify", methods=["POST"])
+@app.route("/simplify-text", methods=['POST'])
 def simplify_text():
-    data = request.get_json()
-    text = data.get("text", "")
+    input_text = request.json.get('text', '')
 
-    if not text:
-        return jsonify({"error": "No text provided"}), 400
-
-    inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True)
-    outputs = model.generate(**inputs)
+    inputs = tokenizer(input_text, return_tensors="pt")
+    outputs = model.generate(**inputs, max_length=150, top_k=50)
     simplified_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-    return jsonify({"simplified_text": simplified_text})
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))  # Default to 10000 if PORT not set
-    app.run(host="0.0.0.0", port=port)
+    print(simplified_text)
+    return make_response(jsonify({"simplifiedText": simplified_text}), 200)
