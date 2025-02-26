@@ -20,22 +20,24 @@ HEADERS = {"Authorization": f"Bearer {os.getenv('HUGGINGFACE_TOKEN')}"}
 @app.route("/simplify-text", methods=['POST'])
 def simplify_text():
     try:
-        # Get JSON data from the request
         data = request.json
         text = data.get('text')
 
-        # Check if text is provided
         if not text:
             return jsonify({"error": "No text provided"}), 400
 
-        # Call the Hugging Face API
-        response = requests.post(API_URL, headers=HEADERS, json={"inputs": text})  # Fix: Use 'headers' instead of 'header'
-        response.raise_for_status()  # Raise an error for bad responses
+        response = requests.post(API_URL, headers=HEADERS, json={"inputs": text})
 
-        # Return the Hugging Face API response
+        # Log full response from Hugging Face API
+        print("Status Code:", response.status_code)
+        print("Response Text:", response.text)
+
+        response.raise_for_status()
+
         return jsonify(response.json())
-    except requests.exceptions.RequestException as e:  # Fix: Use 'requests.exceptions' instead of 'requests.exception'
-        # Handle request errors
+
+    except requests.exceptions.RequestException as e:
+        print("Request Error:", str(e))
         return jsonify({"error": str(e)}), 500
 
 @app.route("/")
