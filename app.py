@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify  # Import Flask, request, and jsonify
 import requests
 import os
+print("HUGGINGFACE_TOKEN:", os.getenv('HUGGINGFACE_TOKEN'))
 from dotenv import load_dotenv
 from flask_cors import CORS
 
