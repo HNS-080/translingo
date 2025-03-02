@@ -18,6 +18,14 @@ CORS(app)
 API_URL = "https://api-inference.huggingface.co/models/JexCaber/TransLingo"
 HEADERS = {"Authorization": f"Bearer {os.getenv('HUGGINGFACE_TOKEN')}"}
 
+
+generation_params = {
+    "inputs": text,
+    "parameters": {
+        "max_length": 150
+    }
+}
+
 @app.route("/simplify-text", methods=['POST'])
 def simplify_text():
     try:
@@ -27,7 +35,7 @@ def simplify_text():
         if not text:
             return jsonify({"error": "No text provided"}), 400
 
-        response = requests.post(API_URL, headers=HEADERS, json={"inputs": text})
+        response = requests.post(API_URL, headers=HEADERS, json=generation_params})
 
         # Log full response from Hugging Face API
         print("Status Code:", response.status_code)
