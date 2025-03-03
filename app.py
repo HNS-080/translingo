@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify  # Import Flask, request, and jsonify
 import requests
 import os
 print("HUGGINGFACE_TOKEN:", os.getenv('HUGGINGFACE_TOKEN'))
+print("HUGGINGFACE_TOKEN2:", os.getenv('HUGGINGFACE_TOKEN2'))
 from dotenv import load_dotenv
 from flask_cors import CORS
 
@@ -18,6 +19,7 @@ CORS(app)
 API_URL1 = "https://api-inference.huggingface.co/models/JexCaber/TransLingo"
 API_URL2 = "https://api-inference.huggingface.co/models/JexCaber/TransLingo-Terms"
 HEADERS = {"Authorization": f"Bearer {os.getenv('HUGGINGFACE_TOKEN')}"}
+HEADERS2 = {"Authorization": f"Bearer {os.getenv('HUGGINGFACE_TOKEN2')}"}
 
 @app.route("/simplify-text", methods=['POST'])
 def simplify_text():
@@ -69,7 +71,7 @@ def term_detection():
         }
 
         # Send request to Hugging Face API
-        response = requests.post(API_URL2, headers=HEADERS, json=generation_params)
+        response = requests.post(API_URL2, headers=HEADERS2, json=generation_params)
 
         # Log response
         print("Status Code:", response.status_code)
