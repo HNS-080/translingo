@@ -28,17 +28,18 @@ def simplify_text():
         if not text:
             return jsonify({"error": "No text provided"}), 400
 
+        # Define generation parameters
+        generation_params = {
+            "inputs": text,
+            "parameters": {
+                "max_length": 150
+            }
+        }
 
-	generation_params = {
-    		"inputs": text,
-    		"parameters": {
-      		  "max_length": 150
-  		}
-	}
-	
+        # Send request to Hugging Face API
         response = requests.post(API_URL, headers=HEADERS, json=generation_params)
 
-        # Log full response from Hugging Face API
+        # Log response
         print("Status Code:", response.status_code)
         print("Response Text:", response.text)
 
