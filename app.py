@@ -15,9 +15,9 @@ app = Flask(__name__)
 CORS(app)
 
 # Hugging Face API details
-API_URL = "https://api-inference.huggingface.co/models/JexCaber/TransLingo"
+API_URL1 = "https://api-inference.huggingface.co/models/JexCaber/TransLingo"
+API_URL2 = "https://api-inference.huggingface.co/models/JexCaber/TransLingo-Terms"
 HEADERS = {"Authorization": f"Bearer {os.getenv('HUGGINGFACE_TOKEN')}"}
-
 
 @app.route("/simplify-text", methods=['POST'])
 def simplify_text():
@@ -37,7 +37,39 @@ def simplify_text():
         }
 
         # Send request to Hugging Face API
-        response = requests.post(API_URL, headers=HEADERS, json=generation_params)
+        response = requests.post(API_URL1, headers=HEADERS, json=generation_params)
+
+        # Log response
+        print("Status Code:", response.status_code)
+        print("Response Text:", response.text)
+
+        response.raise_for_status()
+
+        return jsonify(response.json())
+
+    except requests.exceptions.RequestException as e:
+        print("Request Error:", str(e))
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/term-detection", methods=['POST'])
+def term_detection():
+    try:
+        data = request.json
+        text = data.get('text')
+
+        if not text:
+            return jsonify({"error": "No text provided"}), 400
+
+        # Define generation parameters
+        generation_params = {
+            "inputs": text,
+            "parameters": {
+                "max_length": 150
+            }
+        }
+
+        # Send request to Hugging Face API
+        response = requests.post(API_URL2, headers=HEADERS, json=generation_params)
 
         # Log response
         print("Status Code:", response.status_code)
