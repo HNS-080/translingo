@@ -98,7 +98,13 @@ def term_detection():
             print("Response Text:", response.text)
 
             response.raise_for_status()
-            output_text = response.json().get('generated_text', "")
+            response_json = response.json()
+
+	    # If response is a list, extract the first dictionary
+	    if isinstance(response_json, list) and len(response_json) > 0:
+    		response_json = response_json[0]  
+
+	    output_text = response_json.get('generated_text', "")
 
             output_text = clean_term_output(output_text)
             term, definition = output_text.split("| Definition: ", 1) if "| Definition: " in output_text else (output_text, "")
