@@ -17,8 +17,17 @@ CORS(app)
 os.system("python -m spacy download en_core_web_sm")
 nlp = spacy.load("en_core_web_sm")
 
+csv_path = os.path.join(os.path.dirname(__file__), "ComputerScience_Jargon_Dataset.csv")
+
+if not os.path.exists(csv_path):
+    raise FileNotFoundError(f"CSV file not found at: {csv_path}")
+
 # Load dataset and convert it into a dictionary (Term → Definition)
-df = pd.read_csv(os.path.join(os.path.dirname(__file__), "ComputerScience_Jargon_Dataset.csv"))
+df = pd.read_csv(csv_path)
+
+print("CSV Loaded Successfully! First few rows:")
+print(df.head())  # Debugging output
+
 definitions = dict(zip(df['TERMS'], df['Definition']))
 
 # Hugging Face API details for text simplification
