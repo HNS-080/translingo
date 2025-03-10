@@ -104,7 +104,7 @@ def term_detection():
             if isinstance(response_json, list) and len(response_json) > 0:
                 response_json = response_json[0]  
 
-	    output_text = response_json.get('generated_text', "")
+            output_text = response_json.get('generated_text', "")
 
             output_text = clean_term_output(output_text)
             term, definition = output_text.split("| Definition: ", 1) if "| Definition: " in output_text else (output_text, "")
