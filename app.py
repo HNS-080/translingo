@@ -40,18 +40,30 @@ def simplify_text():
         data = request.json
         text = data.get('text')
 
-        print(f"Received text: {text}")  # Debugging
         if not text:
             return jsonify({"error": "No text provided"}), 400
 
-        generation_params = {"inputs": text, "parameters": {"max_length": 150}}
+        # Define generation parameters
+        generation_params = {
+            "inputs": text,
+            "parameters": {
+                "max_length": 150
+            }
+        }
+
+        # Send request to Hugging Face API
         response = requests.post(API_URL1, headers=HEADERS, json=generation_params)
-        
+
+        # Log response
+        print("Status Code:", response.status_code)
+        print("Response Text:", response.text)
+
         response.raise_for_status()
+
         return jsonify(response.json())
-        print(f"API Response: {json_response}")  # Debugging output
 
     except requests.exceptions.RequestException as e:
+        print("Request Error:", str(e))
         return jsonify({"error": str(e)}), 500
 
 @app.route("/term-detection", methods=['POST'])
