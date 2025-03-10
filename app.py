@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+import requests
 import pandas as pd
 import spacy
 from dotenv import load_dotenv
