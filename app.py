@@ -40,6 +40,7 @@ def simplify_text():
         data = request.json
         text = data.get('text')
 
+        print(f"Received text: {text}")  # Debugging
         if not text:
             return jsonify({"error": "No text provided"}), 400
 
@@ -58,6 +59,7 @@ def term_detection():
         data = request.json
         text = data.get('text')
 
+        print(f"Received text for term detection: {text}")  # Debugging
         if not text:
             return jsonify({"error": "No text provided"}), 400
 
@@ -70,6 +72,7 @@ def term_detection():
             if term in definitions and term not in extracted_terms:  # Check if it's a known term
                 extracted_terms[term] = definitions[term]
 
+        print(f"Extracted Terms: {extracted_terms}")  # Debugging
         return jsonify({"extracted_terms": extracted_terms})
 
     except Exception as e:
