@@ -13,6 +13,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Load English NLP model
+os.system("python -m spacy download en_core_web_sm")
 nlp = spacy.load("en_core_web_sm")
 
 # Load dataset and convert it into a dictionary (Term → Definition)
