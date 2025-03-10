@@ -49,6 +49,7 @@ def simplify_text():
         
         response.raise_for_status()
         return jsonify(response.json())
+        print(f"API Response: {json_response}")  # Debugging output
 
     except requests.exceptions.RequestException as e:
         return jsonify({"error": str(e)}), 500
@@ -83,4 +84,4 @@ def home():
     return "Welcome to the TransLingo API!"
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=10000)
