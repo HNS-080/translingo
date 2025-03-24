@@ -13,15 +13,25 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-os.system("python -m spacy download en_core_web_sm")  # Ensure model is available
+# Load English NLP model
+os.system("python -m spacy download en_core_web_sm")
 nlp = spacy.load("en_core_web_sm")
+
+csv_path = os.path.join(os.path.dirname(__file__), "ComputerScience_Jargon_Dataset.csv")
+
+if not os.path.exists(csv_path):
+    raise FileNotFoundError(f"CSV file not found at: {csv_path}")
+
+# Load dataset and convert it into a dictionary (Term → Definition)
+df = pd.read_csv(csv_path)
+
+definitions = dict(zip(df['TERMS'], df['Definition']))
 
 # Hugging Face API details for text simplification
 API_URL1 = "https://api-inference.huggingface.co/models/JexCaber/TransLingo"
-API_URL2 = "https://api-inference.huggingface.co/models/JexCaber/TransLingo-Terms2"
-HEADERS1 = {"Authorization": f"Bearer {os.getenv('HUGGINGFACE_TOKEN1')}"}
+API_URL2 = "https://api-inference.huggingface.co/models/JexCaber/TransLingo-Terms"
+HEADERS = {"Authorization": f"Bearer {os.getenv('HUGGINGFACE_TOKEN')}"}
 HEADERS2 = {"Authorization": f"Bearer {os.getenv('HUGGINGFACE_TOKEN2')}"}
-
 
 
 def nested_sliding_window_split(text, min_size=3, max_size=12, step_size=5):
@@ -36,10 +46,12 @@ def nested_sliding_window_split(text, min_size=3, max_size=12, step_size=5):
     
     return chunks
 
+
 def clean_term_output(output_text):
     """Cleans extracted term and removes redundant patterns."""
     output_text = output_text.replace("Term: Term:", "Term:").replace("Term:", "", 1).strip()
     return output_text
+
 
 def extract_terms_from_paragraph(paragraph):
     """Uses Hugging Face API to detect terms in text."""
@@ -68,56 +80,9 @@ def extract_terms_from_paragraph(paragraph):
 
     return extracted_terms
 
-def split_by_topics(text):
-    """Splits text into topic-based chunks using Named Entity Recognition (NER)."""
-    doc = nlp(text)
-    topic_chunks = []
-    current_chunk = []
-    current_entities = set()
-
-    for sent in doc.sents:
-        entities = {ent.text.lower() for ent in sent.ents}
-
-        # Start a new topic if entities change significantly
-        if current_entities and len(current_entities.intersection(entities)) < 1:
-            topic_chunks.append(" ".join(current_chunk))
-            current_chunk = []
-            current_entities = entities
-        else:
-            current_entities.update(entities)
-
-        current_chunk.append(sent.text)
-
-    if current_chunk:
-        topic_chunks.append(" ".join(current_chunk))
-
-    return topic_chunks
-
-def simplify_text(paragraph):
-    """Uses Hugging Face API to simplify text based on topic chunks."""
-    topic_chunks = split_by_topics(paragraph)
-    simplified_output = {}
-
-    for i, chunk in enumerate(topic_chunks):
-        generation_params = {
-            "inputs": chunk,
-            "parameters": {"max_length": 150}
-        }
-
-        try:
-            response = requests.post(API_URL1, headers=HEADERS1, json=generation_params)
-            response.raise_for_status()
-            simplified_chunk = response.json()[0]['generated_text']
-            simplified_output[f"Topic {i+1}"] = simplified_chunk
-
-        except requests.exceptions.RequestException as e:
-            return {"error": "Hugging Face API request failed", "details": str(e)}
-
-    return simplified_output
 
 @app.route("/simplify-text", methods=['POST'])
-def api_simplify_text():
-    """API endpoint for text simplification."""
+def simplify_text():
     try:
         data = request.json
         text = data.get('text')
@@ -125,15 +90,26 @@ def api_simplify_text():
         if not text:
             return jsonify({"error": "No text provided"}), 400
 
-        simplified_text = simplify_text(text)
-        return jsonify(simplified_text)
+        # Define generation parameters
+        generation_params = {
+            "inputs": text,
+            "parameters": {
+                "max_length": 150
+            }
+        }
 
-    except Exception as e:
+        # Send request to Hugging Face API
+        response = requests.post(API_URL1, headers=HEADERS, json=generation_params)
+        response.raise_for_status()
+
+        return jsonify(response.json())
+
+    except requests.exceptions.RequestException as e:
         return jsonify({"error": str(e)}), 500
+
 
 @app.route("/term-detection", methods=['POST'])
 def term_detection():
-    """API endpoint for term detection."""
     try:
         data = request.json
         text = data.get('text')
@@ -141,15 +117,29 @@ def term_detection():
         if not text:
             return jsonify({"error": "No text provided"}), 400
 
-        extracted_terms = extract_terms_from_paragraph(text)
+        # Process text with spaCy first
+        doc = nlp(text)
+        extracted_terms = {}
+
+        for token in doc:
+            term = token.text
+            if term in definitions and term not in extracted_terms:
+                extracted_terms[term] = definitions[term]
+
+        # If no terms detected, fallback to Hugging Face API extraction
+        if not extracted_terms:
+            extracted_terms = extract_terms_from_paragraph(text)
+
         return jsonify({"extracted_terms": extracted_terms})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
 @app.route("/")
 def home():
     return "Welcome to the TransLingo API!"
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
