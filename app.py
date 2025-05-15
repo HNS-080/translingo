@@ -28,9 +28,9 @@ df = pd.read_csv(csv_path)
 definitions = dict(zip(df['TERMS'], df['Definition']))
 
 # Hugging Face API details for text simplification
-API_URL1 = "https://api-inference.huggingface.co/models/JustMe080/simplifier"
+API_URL1 = "https://api-inference.huggingface.co/models/JustMe080/simplification"
 API_URL2 = "https://api-inference.huggingface.co/models/JustMe080/Terms"
-HEADERS = {"Authorization": f"Bearer {os.getenv('HUGGINGFACE_TOKEN3')}"}
+HEADERS = {"Authorization": f"Bearer {os.getenv('HUGGINGFACE_TOKEN')}"}
 HEADERS2 = {"Authorization": f"Bearer {os.getenv('HUGGINGFACE_TOKEN2')}"}
 
 
