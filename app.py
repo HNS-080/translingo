@@ -105,7 +105,12 @@ def simplify_text():
         return jsonify(response.json())
 
     except requests.exceptions.RequestException as e:
-        return jsonify({"error": str(e)}), 500
+        print("[ERROR] Hugging Face API failed:", e)
+        return jsonify({"error": "Hugging Face API error", "details": str(e)}), 500
+
+    except Exception as e:
+        print("[ERROR] Unexpected server error:", e)
+        return jsonify({"error": "Unexpected error", "details": str(e)}), 500
 
 
 @app.route("/term-detection", methods=['POST'])
